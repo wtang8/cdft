@@ -88,7 +88,18 @@ class MyTakeStep(object):
         x += np.random.uniform(-s,s,ngrid)
         return x
 
-res = optimize.basinhopping(totalfe,rho,T=bhT,stepsize=MyTakeStep(),niter_success=niters,minimizer_kwargs={'method':'L-BFGS-B','bounds':bnd,'options':{'gtol':gtol,'ftol':ftol,'disp': False}})
+
+res = optimize.basinhopping(totalfe,rho,T=bhT
+#    ,stepsize=MyTakeStep()
+    ,niter_success=niters
+    ,minimizer_kwargs={
+    'method':'L-BFGS-B',
+    'bounds':bnd,
+    'options':{
+    'gtol':gtol,
+    'ftol':ftol,
+    'disp': True}})
+
 np.savetxt('rho.dat',(x,res.x))
 
 data = np.loadtxt('rho.dat')
