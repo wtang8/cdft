@@ -25,10 +25,10 @@ rho = np.zeros(nsp*ngrid,dtype=float)
 rho[0:int(np.floor(ngrid/2))] = rhob
 rho[-int(np.floor(ngrid/2)):] = rhob
 #rho.fill(rhob)
-xpol = np.array([50,50])
-chi = np.matrix('.2 .8; .8 .2')
+xpol = np.array([100,100])
+chi = np.matrix('0. .8; .8 0.')
 #print chi
-totaldensity = rhob*ngrid
+totaldensity = rhob*ngrid/2
 
 mciter = 1000
 mcstep = rhob/20
@@ -57,8 +57,10 @@ def totalfe(rho):
 #    print('%.3f %.3f'% (fent,fmix))
     return fent + fmix
 
+acptrate = 0.0
 feovertime = []
 def TakeStep(rho,p0):
+    global acptrate
     x = rho
     rho += np.random.uniform(-mcstep,mcstep,nsp*ngrid)
     rho[rho < 0.0] = 0.0 
@@ -68,10 +70,12 @@ def TakeStep(rho,p0):
     feovertime.append(fe)
     p1 = np.exp(-fe)
     if p1 > p0:
+        acptrate += 1
 #        print('accepted p1 = %.3e p0 = %.3e'%(p1,p0))
         return rho, p1
     else:
         if np.random.uniform(0.0,1.0) < p1/p0:
+            acptrate += 1
 #            print('accepted p1/p0 = %.3e'%(p1/p0))
             return rho, p1
         else:
@@ -88,6 +92,8 @@ p0 = np.exp(-totalfe(rho))
 for i in range(mciter):
     rho, p0 = TakeStep(rho,p0)
 print(totalfe(rho))
+acptrate /= mciter
+print('Acceptance rate = %.3f' % acptrate)
 np.savetxt('rho.dat',rho)
 
 data = np.loadtxt('rho.dat')
